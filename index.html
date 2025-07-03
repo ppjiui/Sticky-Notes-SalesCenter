@@ -53,7 +53,7 @@
       height: 100%;
       padding: 6px;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.2;
       overflow: hidden;
       cursor: text;
     }
@@ -211,13 +211,16 @@
 
     <div id="style-controls">
       <label for="font-size-control">Font Size: <span id="font-size-value">14</span>px</label>
-      <input type="range" id="font-size-control" min="8" max="100" value="14" step="1" />
+      <input type="range" id="font-size-control" min="8" max="200" value="14" step="1" />
 
       <label for="color-picker-control">Text Color:</label>
       <input type="color" id="color-picker-control" value="#000000" />
 
       <label for="letter-spacing-control">Letter Spacing: <span id="letter-spacing-value">0</span>px</label>
       <input type="range" id="letter-spacing-control" min="0" max="10" value="0" step="0.5" />
+      
+      <label for="line-height-control">Line Height: <span id="line-height-value">1.2</span></label>
+      <input type="range" id="line-height-control" min="0.8" max="3" value="1.2" step="0.1" />
     </div>
 
     <div id="image-buttons">
@@ -294,9 +297,11 @@
     const fontSizeControl = document.getElementById('font-size-control');
     const colorPickerControl = document.getElementById('color-picker-control');
     const letterSpacingControl = document.getElementById('letter-spacing-control');
+    const lineHeightControl = document.getElementById('line-height-control');
 
     const fontSizeValue = document.getElementById('font-size-value');
     const letterSpacingValue = document.getElementById('letter-spacing-value');
+    const lineHeightValue = document.getElementById('line-height-value');
 
     function applyStyleToSelection(styleProp, value) {
       const selection = window.getSelection();
@@ -308,6 +313,7 @@
       if (styleProp === 'fontSize') span.style.fontSize = value + 'px';
       if (styleProp === 'color') span.style.color = value;
       if (styleProp === 'letterSpacing') span.style.letterSpacing = value + 'px';
+      if (styleProp === 'lineHeight') span.style.lineHeight = value;
 
       const extracted = range.extractContents();
       span.appendChild(extracted);
@@ -316,6 +322,10 @@
       const newRange = document.createRange();
       newRange.selectNodeContents(span);
       selection.addRange(newRange);
+    }
+
+    function applyLineHeightToNote(note, lineHeight) {
+      note.style.lineHeight = lineHeight;
     }
 
     fontSizeControl.addEventListener('input', () => {
@@ -332,6 +342,21 @@
       const spacing = letterSpacingControl.value;
       letterSpacingValue.textContent = spacing;
       applyStyleToSelection('letterSpacing', spacing);
+    });
+
+    lineHeightControl.addEventListener('input', () => {
+      const lineHeight = lineHeightControl.value;
+      lineHeightValue.textContent = lineHeight;
+      
+      // Apply to selection if there is one
+      const selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        applyStyleToSelection('lineHeight', lineHeight);
+      }
+      // Otherwise apply to last focused note
+      else if (lastFocusedNote) {
+        applyLineHeightToNote(lastFocusedNote, lineHeight);
+      }
     });
 
     function getFontSizeAtSelection() {
